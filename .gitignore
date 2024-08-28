@@ -1,0 +1,16 @@
+# Ignore temporary files
+*.log
+*.tmp
+*.swp
+
+# Ignore IDE and build files
+.idea/
+*.sublime-project
+*.sublime-workspace
+node_modules/
+dist/
+build/
+
+# Ignore system files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,135 @@
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+    }
+
+    .row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+    }
+
+    .left {
+        width: 70%;
+    }
+
+    .card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+        padding: 25px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        position: relative; /* For positioning the overlay */
+        color: #ffffff; /* Default text color */
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4); /* Black overlay with 40% opacity */
+        z-index: 1; /* Ensures overlay is behind the text */
+    }
+
+    .card .content {
+        position: relative; /* Ensure content is above the overlay */
+        z-index: 2;
+    }
+
+    .card.patrick {
+        background-image: url('../static/patrick_temp.png');
+        background-size: cover;
+        background-position: center;
+        background-blend-mode: multiply;
+    }
+
+    .card.squidward {
+        background-image: url('../static/squidward.png');
+        background-size: cover;
+        background-position: center;
+        background-blend-mode: multiply;
+    }
+
+    .card.michael {
+        background-image: url('../static/michael.jpg');
+        background-size: cover;
+        background-position: center;
+        background-blend-mode: multiply;
+    }
+
+    .card.seidahmet {
+        background-image: url('../static/simulanka.jpg');
+        background-size: cover;
+        background-position: center;
+        background-blend-mode: multiply;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    h1, h2, h3, h4 {
+        text-align: center;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); /* Shadow to enhance text visibility */
+    }
+
+    h1 {
+        font-size: 26px;
+        margin: 0;
+    }
+
+    h2 {
+        font-size: 20px;
+        margin: 15px 0 0 0;
+    }
+
+    h3 {
+        font-size: 18px;
+        margin: 10px 0 0 0;
+        font-style: italic;
+    }
+
+    h4 {
+        font-size: 16px;
+        margin: 20px 0 0 0;
+        text-align: justify;
+        line-height: 1.5;
+    }
+
+    .additional-info {
+        margin-top: 15px;
+        font-size: 14px;
+        color: #dddddd;
+    }
+
+    .additional-info p {
+        margin: 5px 0;
+    }
+
+    .additional-info p strong {
+        color: #ffffff; /* Highlight labels */
+    }
+</style>
+
+<div class="row">
+    <div class="left">
+        <div class="card {% if posts.author == 'Patrick' %}patrick{% elif posts.author == 'Squidward Tenclaus' %}squidward{% elif posts.author == 'Michael Jackson' %}michael{% elif posts.author == 'AHMET' %}seidahmet{% endif %}">
+            <div class="content">
+                <h1>{{ posts.author }}</h1>
+                <h2>{{ posts.song_name }}</h2>
+                <h3>{{ posts.date }}</h3>
+                <h4>{{ posts.details }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
