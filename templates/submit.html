@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latitude and Longitude Input</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 5px;
+            display: block;
+            text-align: left;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .redirect-link {
+            margin-top: 15px;
+        }
+
+        .redirect-link a {
+            text-decoration: none;
+            color: #4CAF50;
+            font-size: 14px;
+        }
+
+        .redirect-link a:hover {
+            color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Enter Coordinates</h2>
+        <form action='{% url 'submit' %}' method="post">
+            {% csrf_token %}
+            <label for="city">City(for fun):</label>
+            <input type="text" id="city" name="city" placeholder="Enter city">
+
+            <label for="latitude">Latitude:</label>
+            <input type="text" id="latitude" name="latitude" placeholder="Enter latitude">
+
+            <label for="longitude">Longitude:</label>
+            <input type="text" id="longitude" name="longitude" placeholder="Enter longitude">
+
+            <input type="submit" value="Submit">
+        </form>
+
+        <div class="redirect-link">
+            <p><a href="https://www.latlong.net/" target="_blank">Get your city's latitude and longitude</a></p>
+        </div>
+        
+        {% for mess in messages %}
+        <p>{{ mess }}</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

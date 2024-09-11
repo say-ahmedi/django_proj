@@ -10,5 +10,11 @@ urlpatterns = [
 
     path('post/<str:pk>', views.post, name='post'),
 
-    path('profile/', views.counter, name='profile'),
+    path('profile/', views.profile, name='profile'),
+
+    path('weather/<str:latitude>/<str:longitude>/', views.weather, name='weather'),
+
+    path('submit/', views.submit, name='submit'),
+
+    # path('search/', views.search, name='search')
 ]
