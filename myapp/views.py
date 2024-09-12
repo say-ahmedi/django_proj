@@ -67,39 +67,37 @@ def profile(request):
     return render(request, 'templates/profile.html', {'posts': posts})
 
 
-def weather(request, latitude, longitude):
-    try:
-        params = {
-            'lat': latitude,
-            'lon': longitude,
-            'appid': API_KEY,
-            'units': 'metric'
-        }
-        response = requests.get(OPEN_WEATHER_WEBSITE, params=params)
-        response.raise_for_status()
-        data = response.json()
-        temp = data['main']['temp']
-        weather_ = data['weather']
-        if response.status_code == 200:
-            weather_data = {
-                'temperature': temp,
-                'description': weather_['description'],
-            }
-            return render(request, 'templates/weather.html', {'data': weather_data})
-    except Exception as e:
-        messages.error(request, f"Request error: {e}")
-        return redirect('submit')
+# def weather(request, latitude, longitude):
+#     try:
+#         params = {
+#             'lat': latitude,
+#             'lon': longitude,
+#             'appid': API_KEY,
+#             'units': 'metric'
+#         }
+#         response = requests.get(OPEN_WEATHER_WEBSITE, params=params)
+#         response.raise_for_status()
+#         data = response.json()
+#         temp = data['main']['temp']
+#         weather_ = data['weather']
+#         if response.status_code == 200:
+#             weather_data = {
+#                 'temperature': temp,
+#                 'description': weather_['description'],
+#             }
+#             return render(request, 'templates/weather.html', {'data': weather_data})
+#     except Exception as e:
+#         messages.error(request, f"Request error: {e}")
+#         return redirect('submit')
 
 
-def submit(request):
-    if request.method == 'POST':
-        city = request.POST.get('city')
-        lat = str(request.POST.get('latitude'))
-        lon = str(request.POST.get('longitude'))
-        if lat and lon:
-            return redirect('weather', latitude=lat, longitude=lon)
-        else:
-            messages.error(request, 'Latitude and Longitude are required')
-            return render(request, 'templates/submit.html')
-    return render(request, 'templates/submit.html')
+# def submit(request):
+#     if request.method == 'POST':
+
+        # if lat and lon:
+        #     return redirect('weather', latitude=lat, longitude=lon)
+        # else:
+        #     messages.error(request, 'Latitude and Longitude are required')
+        #     return render(request, 'templates/submit.html')
+    # return render(request, 'templates/submit.html')
 

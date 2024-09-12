@@ -12,9 +12,4 @@ urlpatterns = [
 
     path('profile/', views.profile, name='profile'),
 
-    path('weather/<str:latitude>/<str:longitude>/', views.weather, name='weather'),
-
-    path('submit/', views.submit, name='submit'),
-
-    # path('search/', views.search, name='search')
 ]
