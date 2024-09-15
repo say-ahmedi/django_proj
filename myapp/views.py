@@ -1,6 +1,11 @@
+import datetime
 import random
+
+import pandas as pd
 from django.contrib.auth.models import User, auth
 from django.shortcuts import render, redirect
+from matplotlib import pyplot as plt
+
 from .models import Feature,Author
 from django.contrib import messages
 import requests
@@ -62,42 +67,34 @@ def post(request, pk):
     return render(request, 'templates/post.html', {'posts': posts})
 
 
+def get_data_by_category(category):
+
+    file = 'data_files/data.csv'
+    df = pd.read_csv(file)
+    df['Date'] = pd.to_datetime(df['Date'])
+    df['Month'] = df['Date'].dt.to_period('M')
+    target_month = datetime.datetime.today().month
+    filtered_data = df[(df['Date'].dt.month == target_month) & (df['Category'] == category)]
+    if not filtered_data.empty:
+        actual_data = filtered_data['Amount'].sum()
+        return f'Total amount spent for {category} in {datetime.datetime.today().strftime("%B")} is {actual_data} Tenge'
+    return filtered_data
+
+
+def data(request):
+    if request.method == 'POST':
+        category = request.POST.get('category')
+        if category:
+            actual_data = get_data_by_category(category)
+        else:
+            actual_data = 'No Category Selected'
+    else:
+        actual_data = 'No Data Available'
+    return render(request, 'templates/data.html', {'data': actual_data})
+
+
+
+
 def profile(request):
     posts = Author.objects.all()
     return render(request, 'templates/profile.html', {'posts': posts})
-
-
-# def weather(request, latitude, longitude):
-#     try:
-#         params = {
-#             'lat': latitude,
-#             'lon': longitude,
-#             'appid': API_KEY,
-#             'units': 'metric'
-#         }
-#         response = requests.get(OPEN_WEATHER_WEBSITE, params=params)
-#         response.raise_for_status()
-#         data = response.json()
-#         temp = data['main']['temp']
-#         weather_ = data['weather']
-#         if response.status_code == 200:
-#             weather_data = {
-#                 'temperature': temp,
-#                 'description': weather_['description'],
-#             }
-#             return render(request, 'templates/weather.html', {'data': weather_data})
-#     except Exception as e:
-#         messages.error(request, f"Request error: {e}")
-#         return redirect('submit')
-
-
-# def submit(request):
-#     if request.method == 'POST':
-
-        # if lat and lon:
-        #     return redirect('weather', latitude=lat, longitude=lon)
-        # else:
-        #     messages.error(request, 'Latitude and Longitude are required')
-        #     return render(request, 'templates/submit.html')
-    # return render(request, 'templates/submit.html')
-
