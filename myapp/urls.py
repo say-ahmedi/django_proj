@@ -13,4 +13,8 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
 
     path('data/', views.data, name='data'),
+
+    path('user_data/', views.user_data, name='user_data'),
+
+    path('retrieve_data/', views.retrieve_data, name='retrieve_data'),
 ]
