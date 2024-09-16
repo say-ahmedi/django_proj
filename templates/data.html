@@ -12,6 +12,7 @@
             padding: 0;
             display: flex;
             height: 100vh;
+            overflow: hidden; /* Prevent body scroll */
         }
 
         .sidebar {
@@ -21,11 +22,10 @@
             border-radius: 12px;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            overflow-y: auto; /* Allows vertical scrolling */
-            position: fixed; /* Keeps the sidebar fixed */
+            position: fixed;
             left: 0;
             top: 0;
-            transition: transform 0.3s ease;
+            overflow-y: auto; /* Allows vertical scrolling */
         }
 
         .sidebar h2 {
@@ -71,146 +71,170 @@
             overflow: hidden;
         }
 
-        .row {
+        .form-container {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        .left {
-            width: 100%;
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            padding: 25px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            overflow: hidden;
-            position: relative; /* For positioning the overlay */
-            color: #ffffff; /* Default text color */
-        }
-
-        /* Overlay for better text visibility */
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4); /* Black overlay with 40% opacity */
-            z-index: 1; /* Ensures overlay is behind the text */
-        }
-
-        .card .content {
-            position: relative; /* Ensure content is above the overlay */
-            z-index: 2;
-        }
-
-        .card.patrick {
-            background-image: url('../static/patrick_temp.png');
-            background-size: cover;
-            background-position: center;
-            background-blend-mode: multiply;
-        }
-
-        .card.squidward {
-            background-image: url('../static/squidward.png');
-            background-size: cover;
-            background-position: center;
-            background-blend-mode: multiply;
-        }
-
-        .card.michael {
-            background-image: url('../static/michael.jpg');
-            background-size: cover;
-            background-position: center;
-            background-blend-mode: multiply;
-        }
-
-        .card.seidahmet {
-            background-image: url('../static/simulanka.jpg');
-            background-size: cover;
-            background-position: center;
-            background-blend-mode: multiply;
-        }
-
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        h1, h2, h3, h4 {
-            text-align: center;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); /* Shadow to enhance text visibility */
+        .form-group label {
+            font-size: 16px;
             color: #333;
         }
 
-        h1 {
-            font-size: 26px;
-            margin: 0;
-        }
-
-        h2 {
-            font-size: 20px;
-            margin: 15px 0 0 0;
-        }
-
-        h3 {
-            font-size: 18px;
-            margin: 10px 0 0 0;
-            font-style: italic;
-        }
-
-        h4 {
+        .form-group input[type="text"],
+        .form-group select {
+            padding: 10px;
             font-size: 16px;
-            margin: 20px 0 0 0;
-            text-align: justify;
-            line-height: 1.5;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 100%;
+            box-sizing: border-box;
         }
+
+        .form-group input[type="text"] {
+            width: calc(100% - 24px); /* Full width minus padding */
+        }
+
+        .form-group button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .scrollable-area {
+            max-height: 150px; /* Adjust as needed */
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .scrollable-area label {
+            font-size: 14px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .scrollable-area select {
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <form id="category-form" action="{% url 'data' %}" method="post">
-            {% csrf_token %}
-            <h2>Categories</h2>
-            <ul>
-                <li><a href="#" data-category="Internet">Internet</a></li>
-                <li><a href="#" data-category="Transportation">Transportation</a></li>
-                <li><a href="#" data-category="Office Needles">Office Needles</a></li>
-                <li><a href="#" data-category="Commercial">Commercial</a></li>
-                <li><a href="#" data-category="SpecSit">SpecSit</a></li>
-                <li><a href="#" data-category="Products">Products</a></li>
-                <li><a href="#" data-category="BusBill">BusBill</a></li>
-            </ul>
-        </form>
+        <h2>Categories</h2>
+        <ul>
+            <li><a href="#" data-category="Internet">Internet</a></li>
+            <li><a href="#" data-category="Transportation">Transportation</a></li>
+            <li><a href="#" data-category="Office Needles">Office Needles</a></li>
+            <li><a href="#" data-category="Commercial">Commercial</a></li>
+            <li><a href="#" data-category="SpecSit">SpecSit</a></li>
+            <li><a href="#" data-category="Products">Products</a></li>
+            <li><a href="#" data-category="BusBill">BusBill</a></li>
+        </ul>
     </div>
 
     <div class="main-content">
-        <div class="row">
-            <div class="left">
-                <form id="data-form" action="{% url 'data' %}" method="post">
-                    {% csrf_token %}
-                    <div class="content">
-                        <h1>{{ data }}</h1>
-                    </div>
-                </form>
+        <div class="form-container">
+            <form id="data-form" action="{% url 'data' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <h1>{{ data }}</h1>
+                    <input type="hidden" name="category" id="category-input">
+                    <label for="new-data">Enter amount:</label>
+                    <input type="text" name="new-data" id="new-data" placeholder="Enter amount for the selected category" pattern="\d*">
+                    <label for="currency">Select currency:</label>
+                    <select name="currency" id="currency">
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                        <option value="JPY">JPY</option>
+                        <!-- Add more currencies as needed -->
+                    </select>
+                    <button type="submit">Submit Data</button>
+                </div>
+            </form>
+
+            <form id="retrieve-form" action="{% url 'retrieve_data' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <button type="submit">Retrieve Data</button>
+                </div>
+            </form>
+
+            <div class="scrollable-area">
+                <label for="category-selection">Categories:</label>
+                <select id="category-selection" name="category-selection">
+                    <!-- The options will be dynamically populated by JavaScript -->
+                </select>
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
             </div>
         </div>
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categories = [
+                'Internet',
+                'Transportation',
+                'Office Needles',
+                'Commercial',
+                'SpecSit',
+                'Products',
+                'BusBill'
+            ];
+
+            const categorySelect = document.getElementById('category-selection');
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+        });
+
         document.querySelectorAll('.sidebar a').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const category = this.getAttribute('data-category');
-                document.getElementById('data-form').innerHTML = `<input type="hidden" name="category" value="${category}">{% csrf_token %}`;
-                document.getElementById('data-form').submit();
+                document.getElementById('category-input').value = category;
+                document.querySelector('input[name="new-data"]').focus(); // Focus the input field
+
+                // Update the category selection dropdown with the selected category
+                const categorySelect = document.getElementById('category-selection');
+                const existingOption = [...categorySelect.options].find(opt => opt.value === category);
+
+                if (existingOption) {
+                    categorySelect.value = category;
+                } else {
+                    const newOption = document.createElement('option');
+                    newOption.value = category;
+                    newOption.textContent = category;
+                    categorySelect.appendChild(newOption);
+                    categorySelect.value = category;
+                }
             });
         });
     </script>
