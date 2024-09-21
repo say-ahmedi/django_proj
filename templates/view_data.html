@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrollable Sidebar with Categories</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden; /* Prevent body scroll */
+        }
+
+        .sidebar {
+            width: 250px;
+            height: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto; /* Allows vertical scrolling */
+        }
+
+        .sidebar h2 {
+            font-size: 20px;
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+            display: block;
+            padding: 12px 15px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: #007bff;
+            color: #ffffff;
+        }
+
+        .main-content {
+            margin-left: 270px; /* Adjust according to sidebar width */
+            padding: 20px;
+            flex: 1;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .scrollable-area {
+            max-height: 150px; /* Adjust as needed */
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .scrollable-area label {
+            font-size: 14px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .scrollable-area select {
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .data-display {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            max-width: 400px; /* Optional max width for better visibility */
+        }
+
+        .message {
+            color: red; /* Style for error messages */
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Categories</h2>
+        <ul>
+            <li><a href="#" data-category="Internet">Internet</a></li>
+            <li><a href="#" data-category="Transportation">Transportation</a></li>
+            <li><a href="#" data-category="Office Needles">Office Needles</a></li>
+            <li><a href="#" data-category="Commercial">Commercial</a></li>
+            <li><a href="#" data-category="SpecSit">SpecSit</a></li>
+            <li><a href="#" data-category="Products">Products</a></li>
+            <li><a href="#" data-category="BusBill">BusBill</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+            <form action="{% url 'view_data' %}" method="post">
+                {% csrf_token %}
+                <label for="category">Selected Category:</label>
+                <select id="category" name="category">
+                    <option value="" disabled selected>Select:</option>
+                </select>
+                
+                {% if category %}
+                <div class="data-display">
+                    <h2>Category: {{ category }}</h2>
+                </div>
+                {% endif %}
+
+                {% if received_data and category %}
+                    <div class="data-display">
+                        <h1>Amount: {{ received_data }}</h1>
+                    </div>
+                {% else %}
+                    <div class="data-display">
+                        <h1>No actual data</h1>
+                    </div>
+                {% endif %}
+                
+            </form>
+    </div>
+    
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categories = [
+                'Internet',
+                'Transportation',
+                'Office Needles',
+                'Commercial',
+                'SpecSit',
+                'Products',
+                'BusBill'
+            ];
+
+            const categorySelect = document.getElementById('category');
+            
+            // Populate dropdown options
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+
+            document.querySelectorAll('.sidebar a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const category = this.getAttribute('data-category');
+                    
+                    // Update the category selection dropdown with the selected category
+                    categorySelect.value = category; // Select the category in the dropdown
+                    
+                    // Submit the form automatically to view data
+                    document.querySelector('form').submit();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

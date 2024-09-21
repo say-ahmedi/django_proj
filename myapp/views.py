@@ -72,23 +72,20 @@ def post(request, pk):
 def get_data_by_category(category, file_path):
     df = pd.read_csv(file_path)
     filtered_data = df[df['Category'] == category]
-    return filtered_data.to_dict(orient='records')
+
+    # return filtered_data.to_dict(orient='records')
+    result = filtered_data['Amount'].sum()
+    return result
 
 
-def retrieve_data(request):
-    if request.user.is_authenticated:
-        file_path = os.path.join('data_files', request.user.username, 'data.csv')
-        if os.path.exists(file_path):
-            df = pd.read_csv(file_path)
-            # Example: Just sending data as a list of dictionaries for now
-            data = df.to_dict(orient='records')
-            return render(request, 'templates/retrieve_data.html', {'data': data})
-        else:
-            messages.error(request, 'Data file does not exist')
-            return redirect('user_data')
-    else:
-        messages.error(request, 'User is not authenticated')
-        return redirect('login')
+def insert_data_by_category(category, new_data, file_path):
+    # new_data = int(new_data)
+    data_ = pd.read_csv(file_path)
+    df = pd.DataFrame(data_)
+    current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+    new_data = pd.DataFrame([{'Date': current_date, 'Amount': new_data, 'Category': category}])
+    df = pd.concat([df, new_data], ignore_index=True)
+    df.to_csv(file_path, index=False)
 
 
 def data(request):
@@ -97,34 +94,27 @@ def data(request):
         if os.path.exists(file_path):
             if request.method == 'POST':
                 category = request.POST.get('category')
-                new_data = request.POST.get('new-data')
-                selected_category = request.POST.get('category-selection')
-
-                if category:
-                    actual_data = get_data_by_category(category, file_path)
+                new_data = request.POST['new-data']
+                if category and new_data:
+                    insert_data_by_category(category, new_data, file_path)
                 else:
-                    actual_data = 'No Category Selected'
-
-                if new_data and selected_category:
-                    current_data = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-                    df = pd.read_csv(file_path)
-                    add_data = pd.DataFrame([{'Date': current_data, 'Amount': new_data, 'Category': selected_category}])
-                    df = pd.concat([df, add_data], ignore_index=True)
-                    df.to_csv(file_path, index=False)
-                    messages.success(request, 'Data has been updated successfully')
-                else:
-                    messages.error(request, 'Please provide all required information')
+                    messages.error(request, f'Category or data entry is empty {category, new_data}')
 
                 return redirect('data')
-            else:
-                actual_data = 'No Data Available'
-            return render(request, 'templates/data.html', {'data': actual_data})
+    return render(request, 'templates/data.html')
+
+
+def view_data(request):
+    file_path = os.path.join('data_files', request.user.username, 'data.csv')
+    received_data = None
+    category = None
+    if request.method == 'POST':
+        category = request.POST.get('category')
+        if category:
+            received_data = get_data_by_category(category, file_path)
         else:
-            messages.error(request, 'Data file does not exist')
-            return redirect('user_data')
-    else:
-        messages.error(request, 'User is not authenticated')
-        return redirect('login')
+            messages.error(request, f'No category selected')
+    return render(request, 'templates/view_data.html', {'received_data': received_data, 'category': category})
 
 
 def user_data(request):
@@ -136,19 +126,14 @@ def user_data(request):
 
     if request.method == "POST" and 'create' in request.POST:
         if not exists:
-            # Create the user-specific directory if it does not exist
             if not os.path.exists(user_directory):
                 os.makedirs(user_directory)
-            # Create a new CSV file
-            new_data = pd.DataFrame(columns=['Date', 'Category', 'Amount'])
-            new_data.to_csv(file_path, index=False)
-            messages.success(request, 'File has been created')
+
             return redirect('user_data')
         else:
             messages.info(request, 'File already exists')
 
     return render(request, 'templates/user_data.html', {'user': user_, 'file_path': exists})
-
 
 
 def profile(request):

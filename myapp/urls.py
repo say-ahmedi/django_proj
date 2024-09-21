@@ -16,5 +16,5 @@ urlpatterns = [
 
     path('user_data/', views.user_data, name='user_data'),
 
-    path('retrieve_data/', views.retrieve_data, name='retrieve_data'),
+    path('view_data/', views.view_data, name='view_data'),
 ]

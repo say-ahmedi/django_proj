@@ -98,10 +98,6 @@
             box-sizing: border-box;
         }
 
-        .form-group input[type="text"] {
-            width: calc(100% - 24px); /* Full width minus padding */
-        }
-
         .form-group button {
             padding: 10px 20px;
             font-size: 16px;
@@ -156,15 +152,14 @@
 
     <div class="main-content">
         <div class="form-container">
-            <form id="data-form" action="{% url 'data' %}" method="post">
+            <form action="{% url 'data' %}" method="post">
                 {% csrf_token %}
                 <div class="form-group">
-                    <h1>{{ data }}</h1>
                     <input type="hidden" name="category" id="category-input">
                     <label for="new-data">Enter amount:</label>
-                    <input type="text" name="new-data" id="new-data" placeholder="Enter amount for the selected category" pattern="\d*">
+                    <input type="text" name="new-data" id="new-data" placeholder="Enter amount for the selected category" pattern="\d*" required>
                     <label for="currency">Select currency:</label>
-                    <select name="currency" id="currency">
+                    <select name="currency" id="currency" required>
                         <option value="USD">USD</option>
                         <option value="EUR">EUR</option>
                         <option value="GBP">GBP</option>
@@ -175,68 +170,61 @@
                 </div>
             </form>
 
-            <form id="retrieve-form" action="{% url 'retrieve_data' %}" method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <button type="submit">Retrieve Data</button>
-                </div>
-            </form>
-
             <div class="scrollable-area">
-                <label for="category-selection">Categories:</label>
-                <select id="category-selection" name="category-selection">
-                    <!-- The options will be dynamically populated by JavaScript -->
-                </select>
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
+    <label for="category-selection">Selected Category (Left SideBar):</label>
+    <select id="category-selection" name="category-selection" disabled>
+        <option value="" disabled selected>Select:</option> <!-- Default option -->
+        <!-- The options will be dynamically populated by JavaScript -->
+    </select><div class="d-flex">
+            <a href="{% url 'view_data' %}">View Data</a>
             </div>
-        </div>
-    </div>
+    {% for message in messages %}
+        <p>{{ message }}</p>
+    {% endfor %}
+</div>
+</div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const categories = [
-                'Internet',
-                'Transportation',
-                'Office Needles',
-                'Commercial',
-                'SpecSit',
-                'Products',
-                'BusBill'
-            ];
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const categories = [
+            'Internet',
+            'Transportation',
+            'Office Needles',
+            'Commercial',
+            'SpecSit',
+            'Products',
+            'BusBill'
+        ];
 
+        const categorySelect = document.getElementById('category-selection');
+        
+        // Default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        defaultOption.textContent = 'Select:';
+        categorySelect.appendChild(defaultOption);
+
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categorySelect.appendChild(option);
+        });
+    });
+
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const category = this.getAttribute('data-category');
+            document.getElementById('category-input').value = category;
+            document.querySelector('input[name="new-data"]').focus(); // Focus the input field
+
+            // Update the category selection dropdown with the selected category
             const categorySelect = document.getElementById('category-selection');
-            categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category;
-                option.textContent = category;
-                categorySelect.appendChild(option);
-            });
+            categorySelect.value = category; // Select the category in the dropdown
         });
-
-        document.querySelectorAll('.sidebar a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const category = this.getAttribute('data-category');
-                document.getElementById('category-input').value = category;
-                document.querySelector('input[name="new-data"]').focus(); // Focus the input field
-
-                // Update the category selection dropdown with the selected category
-                const categorySelect = document.getElementById('category-selection');
-                const existingOption = [...categorySelect.options].find(opt => opt.value === category);
-
-                if (existingOption) {
-                    categorySelect.value = category;
-                } else {
-                    const newOption = document.createElement('option');
-                    newOption.value = category;
-                    newOption.textContent = category;
-                    categorySelect.appendChild(newOption);
-                    categorySelect.value = category;
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+    });
+</script>
