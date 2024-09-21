@@ -78,12 +78,12 @@ def get_data_by_category(category, file_path):
     return result
 
 
-def insert_data_by_category(category, new_data, file_path):
+def insert_data_by_category(category, new_data, file_path, currency):
     # new_data = int(new_data)
     data_ = pd.read_csv(file_path)
     df = pd.DataFrame(data_)
     current_date = datetime.datetime.now().strftime('%Y-%m-%d')
-    new_data = pd.DataFrame([{'Date': current_date, 'Amount': new_data, 'Category': category}])
+    new_data = pd.DataFrame([{'Date': current_date, 'Amount': new_data, 'Category': category, 'Currency': currency}])
     df = pd.concat([df, new_data], ignore_index=True)
     df.to_csv(file_path, index=False)
 
@@ -95,8 +95,9 @@ def data(request):
             if request.method == 'POST':
                 category = request.POST.get('category')
                 new_data = request.POST['new-data']
+                currency = request.POST.get('currency')
                 if category and new_data:
-                    insert_data_by_category(category, new_data, file_path)
+                    insert_data_by_category(category, new_data, file_path, currency)
                 else:
                     messages.error(request, f'Category or data entry is empty {category, new_data}')
 

@@ -6,8 +6,8 @@
     <title>Scrollable Sidebar with Categories</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f06, #8345e6);
             margin: 0;
             padding: 0;
             display: flex;
@@ -17,23 +17,26 @@
 
         .sidebar {
             width: 250px;
-            height: 100%;
+            height: calc(100% - 40px); /* Makes sure the sidebar fits inside the viewport */
             background-color: #ffffff;
             border-radius: 12px;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
             padding: 20px;
             position: fixed;
-            left: 0;
-            top: 0;
+            left: 20px;
+            top: 20px;
+            bottom: 20px;
             overflow-y: auto; /* Allows vertical scrolling */
+            z-index: 100;
         }
 
         .sidebar h2 {
-            font-size: 20px;
+            font-size: 24px;
             margin-top: 0;
             color: #333;
             border-bottom: 2px solid #e0e0e0;
             padding-bottom: 10px;
+            font-weight: bold;
         }
 
         .sidebar ul {
@@ -43,65 +46,140 @@
         }
 
         .sidebar ul li {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .sidebar ul li a {
             text-decoration: none;
-            color: #333;
+            color: #555;
             font-size: 16px;
             display: block;
             padding: 12px 15px;
-            border-radius: 6px;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            border-radius: 8px;
+            background-color: #f7f7f7;
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s;
         }
 
         .sidebar ul li a:hover {
-            background-color: #007bff;
+            background-color: #6f42c1;
             color: #ffffff;
+            transform: translateX(5px);
         }
 
         .main-content {
-            margin-left: 270px; /* Adjust according to sidebar width */
-            padding: 20px;
+            margin-left: 290px;
+            padding: 40px;
             flex: 1;
             background-color: #ffffff;
             border-radius: 12px;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .scrollable-area {
-            max-height: 150px; /* Adjust as needed */
             overflow-y: auto;
-            margin-top: 20px;
+            margin-right: 20px;
+            max-width: calc(100% - 350px);
+            align-self: center;
         }
 
-        .scrollable-area label {
-            font-size: 14px;
+        form label {
+            font-size: 18px;
+            color: #333;
             margin-bottom: 5px;
             display: block;
+            font-weight: bold;
         }
 
-        .scrollable-area select {
+        form select {
             width: 100%;
-            padding: 8px;
-            font-size: 14px;
+            padding: 10px;
+            font-size: 16px;
             border: 1px solid #ddd;
-            border-radius: 6px;
+            border-radius: 8px;
+            margin-top: 10px;
+            background-color: #f7f7f7;
+            transition: border-color 0.3s ease;
+        }
+
+        form select:focus {
+            border-color: #6f42c1;
+            outline: none;
         }
 
         .data-display {
             margin-top: 20px;
-            padding: 15px;
+            padding: 20px;
             border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 12px;
             background-color: #f9f9f9;
-            max-width: 400px; /* Optional max width for better visibility */
+            max-width: 100%;
+            text-align: center;
+        }
+
+        .data-display h2, .data-display h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .data-display h1 {
+            font-size: 28px;
+            font-weight: bold;
+            color: #6f42c1;
         }
 
         .message {
-            color: red; /* Style for error messages */
+            color: red;
+        }
+
+        a {
+            text-decoration: none;
+            color: #6f42c1;
+            font-size: 16px;
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: 1px solid #6f42c1;
+            border-radius: 8px;
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        a:hover {
+            background-color: #6f42c1;
+            color: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+                left: 10px;
+                padding: 10px;
+            }
+
+            .main-content {
+                margin-left: 220px;
+                padding: 20px;
+                max-width: calc(100% - 240px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                left: 0;
+                top: 0;
+                height: auto;
+                margin-bottom: 20px;
+                border-radius: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -120,33 +198,31 @@
     </div>
 
     <div class="main-content">
-            <form action="{% url 'view_data' %}" method="post">
-                {% csrf_token %}
-                <label for="category">Selected Category:</label>
-                <select id="category" name="category">
-                    <option value="" disabled selected>Select:</option>
-                </select>
-                
-                {% if category %}
-                <div class="data-display">
-                    <h2>Category: {{ category }}</h2>
-                </div>
-                {% endif %}
+        <form action="{% url 'view_data' %}" method="post">
+            {% csrf_token %}
+            <label for="category">Selected Category:</label>
+            <select id="category" name="category">
+                <option value="" >Select:</option>
+            </select>
 
-                {% if received_data and category %}
-                    <div class="data-display">
-                        <h1>Amount: {{ received_data }}</h1>
-                    </div>
-                {% else %}
-                    <div class="data-display">
-                        <h1>No actual data</h1>
-                    </div>
-                {% endif %}
-                <a href="{% url 'data' %}">Insert Data</a>
-                
-            </form>
+            {% if category %}
+            <div class="data-display">
+                <h2>Category: {{ category }}</h2>
+            </div>
+            {% endif %}
+
+            {% if received_data and category %}
+                <div class="data-display">
+                    <h1>Amount: {{ received_data }}</h1>
+                </div>
+            {% else %}
+                <div class="data-display">
+                    <h1>No data for this category</h1>
+                </div>
+            {% endif %}
+            <a href="{% url 'data' %}">Insert Data</a>
+        </form>
     </div>
-    
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
