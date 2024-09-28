@@ -210,7 +210,12 @@
                 <h2>Category: {{ category }}</h2>
             </div>
             {% endif %}
-
+            {% if figure %}
+        <div class="data-display">
+            <h2>Chart for {{ category }}</h2>
+                <img src="data:image/png;base64,{{ figure }}" alt="Bar Chart">
+        </div>
+            {% endif %}
             {% if received_data and category %}
                 <div class="data-display">
                     <h1>Amount: {{ received_data }}</h1>

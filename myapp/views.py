@@ -1,15 +1,15 @@
+import base64
 import datetime
 import os
-import random
-from django.conf import settings
 import pandas as pd
 from django.contrib.auth.models import User, auth
 from django.shortcuts import render, redirect
 from matplotlib import pyplot as plt
 
-from .models import Feature,Author
+from .models import Feature, Author
 from django.contrib import messages
-import requests
+from io import BytesIO
+
 
 OPEN_WEATHER_WEBSITE = 'https://api.openweathermap.org/data/2.5/weather'
 
@@ -48,7 +48,6 @@ def login(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        global user
         user = auth.authenticate(username=username, password=password)
         if user is not None:
             auth.login(request, user)
@@ -105,6 +104,19 @@ def data(request):
     return render(request, 'templates/data.html')
 
 
+def show_graph(category, received_data):
+    x = [category]
+    y = [received_data]
+    plt.bar(x, y)
+    plt.title(f'Net Spend for {category}')
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    plt.close()
+    buffer.seek(0)
+    figure = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    return figure
+
+
 def view_data(request):
     file_path = os.path.join('data_files', request.user.username, 'data.csv')
     received_data = None
@@ -113,9 +125,10 @@ def view_data(request):
         category = request.POST.get('category')
         if category:
             received_data = get_data_by_category(category, file_path)
+            figure = show_graph(category, received_data)
         else:
             messages.error(request, f'No category selected')
-    return render(request, 'templates/view_data.html', {'received_data': received_data, 'category': category})
+    return render(request, 'templates/view_data.html', {'received_data': received_data, 'category': category, "figure": figure})
 
 
 def user_data(request):
