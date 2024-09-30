@@ -3,16 +3,15 @@ import datetime
 import os
 import pandas as pd
 from django.contrib.auth.models import User, auth
+from django.http import request
 from django.shortcuts import render, redirect
 from matplotlib import pyplot as plt
-
 from .models import Feature, Author
 from django.contrib import messages
 from io import BytesIO
 
 
 OPEN_WEATHER_WEBSITE = 'https://api.openweathermap.org/data/2.5/weather'
-
 API_KEY = '9c4105c6d77a231031727bbe25190291'
 
 
@@ -51,7 +50,7 @@ def login(request):
         user = auth.authenticate(username=username, password=password)
         if user is not None:
             auth.login(request, user)
-            return redirect('index')  # Redirect to the index view
+            return redirect('index')
         else:
             messages.error(request, 'Username or Password is incorrect')
             return redirect('login')
@@ -68,22 +67,21 @@ def post(request, pk):
     return render(request, 'templates/post.html', {'posts': posts})
 
 
-def get_data_by_category(category, file_path):
+def get_data_by_category(category, file_path, month):
     df = pd.read_csv(file_path)
-    filtered_data = df[df['Category'] == category]
-
-    # return filtered_data.to_dict(orient='records')
-    result = filtered_data['Amount'].sum()
-    return result
+    df['Date'] = pd.to_datetime(df['Date'])
+    df["Month"] = df["Date"].dt.strftime("%B")
+    filtered_data = df[(df['Month'] == month) & (df['Category'] == category)]
+    return filtered_data
 
 
 def insert_data_by_category(category, new_data, file_path, currency):
-    # new_data = int(new_data)
+    new_data = float(new_data)  # Ensure new_data is a float
     data_ = pd.read_csv(file_path)
     df = pd.DataFrame(data_)
     current_date = datetime.datetime.now().strftime('%Y-%m-%d')
-    new_data = pd.DataFrame([{'Date': current_date, 'Amount': new_data, 'Category': category, 'Currency': currency}])
-    df = pd.concat([df, new_data], ignore_index=True)
+    new_data_df = pd.DataFrame([{'Date': current_date, 'Amount': new_data, 'Category': category, 'Currency': currency}])
+    df = pd.concat([df, new_data_df], ignore_index=True)
     df.to_csv(file_path, index=False)
 
 
@@ -104,17 +102,26 @@ def data(request):
     return render(request, 'templates/data.html')
 
 
-def show_graph(category, received_data):
-    x = [category]
-    y = [received_data]
-    plt.bar(x, y)
-    plt.title(f'Net Spend for {category}')
-    buffer = BytesIO()
-    plt.savefig(buffer, format='png')
-    plt.close()
-    buffer.seek(0)
-    figure = base64.b64encode(buffer.getvalue()).decode('utf-8')
-    return figure
+def show_graph(category, file_path):
+    x = ['September', 'October', 'November', 'December']
+    y = [get_data(file_path, category, mth) for mth in x]
+    fig, ax = plt.subplots()
+    ax.plot(x, y)
+    plt.title(category)
+    plt.xlabel('Month')
+    plt.ylabel('Amount')
+    plt.grid()
+    plt.close(fig)
+    return fig
+
+
+def get_data(file_path, category, month):
+    df = pd.read_csv(file_path)
+    df['Date'] = pd.to_datetime(df['Date'])
+    df["Month"] = df["Date"].dt.strftime("%B")
+    filtered_data = df[(df['Category'] == category) & (df['Month'] == month)]
+    summary = filtered_data["Amount"].sum()
+    return summary
 
 
 def view_data(request):
@@ -124,16 +131,23 @@ def view_data(request):
     if request.method == 'POST':
         category = request.POST.get('category')
         if category:
-            received_data = get_data_by_category(category, file_path)
-            figure = show_graph(category, received_data)
+            received_data = get_data_by_category(category, file_path, datetime.datetime.today().strftime('%B'))
+            media_dir = os.path.join('data_files', request.user.username, 'media')
+            if not os.path.exists(media_dir):
+                os.makedirs(media_dir)
+
+            figure = show_graph(category, file_path)
+            figure_path = os.path.join(media_dir, f'{category}.png')
+            figure.savefig(figure_path)
+            plt.close(figure)
+            return render(request, 'templates/view_data.html', {'received_data': received_data, 'figure_path': figure_path, 'category': category})
         else:
-            messages.error(request, f'No category selected')
-    return render(request, 'templates/view_data.html', {'received_data': received_data, 'category': category, "figure": figure})
+            messages.error(request, 'No category selected')
+    return render(request, 'templates/view_data.html', {'received_data': received_data, 'category': category})
 
 
 def user_data(request):
     user_ = request.user
-    # Construct the absolute path
     user_directory = os.path.join('data_files', user_.username)
     file_path = os.path.join(user_directory, 'data.csv')
     exists = os.path.exists(file_path)
@@ -142,7 +156,6 @@ def user_data(request):
         if not exists:
             if not os.path.exists(user_directory):
                 os.makedirs(user_directory)
-
             return redirect('user_data')
         else:
             messages.info(request, 'File already exists')
