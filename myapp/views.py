@@ -9,6 +9,8 @@ from matplotlib import pyplot as plt
 from .models import Feature, Author
 from django.contrib import messages
 from io import BytesIO
+from django.conf import settings
+
 
 
 OPEN_WEATHER_WEBSITE = 'https://api.openweathermap.org/data/2.5/weather'
@@ -103,16 +105,28 @@ def data(request):
 
 
 def show_graph(category, file_path):
+    # Sample data for graph (x-axis and y-axis)
     x = ['September', 'October', 'November', 'December']
     y = [get_data(file_path, category, mth) for mth in x]
+
+    # Generate the plot
     fig, ax = plt.subplots()
     ax.plot(x, y)
-    plt.title(category)
+    plt.title(f'{category} Expenses')
     plt.xlabel('Month')
     plt.ylabel('Amount')
     plt.grid()
-    plt.close(fig)
-    return fig
+
+    # Save the plot as an image in the media directory
+    media_dir = os.path.join(settings.MEDIA_ROOT, 'graphs')
+    if not os.path.exists(media_dir):
+        os.makedirs(media_dir)
+    image_path = os.path.join(media_dir, f'{category}.png')
+
+    fig.savefig(image_path)
+    plt.close(fig)  # Close the figure to free up memory
+
+    return f'/media/graphs/{category}.png'
 
 
 def get_data(file_path, category, month):
@@ -128,23 +142,22 @@ def view_data(request):
     file_path = os.path.join('data_files', request.user.username, 'data.csv')
     received_data = None
     category = None
+    figure_path = None
+    summary = None
+
     if request.method == 'POST':
         category = request.POST.get('category')
         if category:
-            received_data = get_data_by_category(category, file_path, datetime.datetime.today().strftime('%B'))
-            media_dir = os.path.join('data_files', request.user.username, 'media')
-            if not os.path.exists(media_dir):
-                os.makedirs(media_dir)
-
-            figure = show_graph(category, file_path)
-            figure_path = os.path.join(media_dir, f'{category}.png')
-            figure.savefig(figure_path)
-            plt.close(figure)
-            return render(request, 'templates/view_data.html', {'received_data': received_data, 'figure_path': figure_path, 'category': category})
+            received_data = get_data(file_path, category, datetime.datetime.today().strftime('%B'))
+            summary = get_data(file_path, category, datetime.datetime.today().strftime('%B'))
+            # Generate the graph and get the image path
+            figure_path = show_graph(category, file_path)
+            return render(request, 'view_data.html', {'summary': summary, 'figure_path': figure_path, 'category': category})
         else:
             messages.error(request, 'No category selected')
-    return render(request, 'templates/view_data.html', {'received_data': received_data, 'category': category})
 
+    return render(request, 'view_data.html',
+                  {'summary': summary, 'figure_path': figure_path, 'category': category})
 
 def user_data(request):
     user_ = request.user
